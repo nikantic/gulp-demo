@@ -9,12 +9,13 @@ var del = require("del");
 var imagemin = require('gulp-imagemin');
 var imageminPngquant = require('imagemin-pngquant');
 var imageminJpegoptim = require('imagemin-jpegoptim');
+var browserSync = require('browser-sync').create();
 
 // FILE PATHS
 var PATHS = {
-	src: 'website/src/**/*',
+	src: 'website/src',
 	srcHTML: 'website/src/index.html',
-	srcSCSS: 'website/src/scss/styles.scss',
+	srcSCSS: 'website/src/scss/**/*.scss',
 	srcJS: 'website/src/js/**/*.js',
 	srcIMG: 'website/src/images/**/*.{png,jpeg,jpg,svg,gif}',
 
@@ -26,12 +27,13 @@ var PATHS = {
 
 // Sass task
 gulp.task('sass', function() {
-	return gulp.src(PATHS.srcSCSS)
+	return gulp.src('website/src/scss/styles.scss')
 		.pipe(autoprefixer())
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
-		.pipe(gulp.dest(PATHS.dist + '/css'));
+		.pipe(gulp.dest(PATHS.dist + '/css'))
+		.pipe(browserSync.stream());
 });
 
 // Scripts task
@@ -39,7 +41,8 @@ gulp.task('scripts', function() {
 	return gulp.src(PATHS.srcJS)
 		.pipe(concat('scripts.js'))
 		.pipe(uglify())
-		.pipe(gulp.dest(PATHS.dist + '/js'));
+		.pipe(gulp.dest(PATHS.dist + '/js'))
+		.pipe(browserSync.stream());
 });
 
 // HTML task to copy index file
@@ -56,7 +59,8 @@ gulp.task('inject', ['html-copy'], function() {
 		.pipe(inject(css, { relative: true }))
 		.pipe(inject(js, { relative: true }))
 		.pipe(strip())
-		.pipe(gulp.dest(PATHS.dist));
+		.pipe(gulp.dest(PATHS.dist))
+		.pipe(browserSync.stream());
 });
 
 // Images task
@@ -74,7 +78,8 @@ gulp.task('images', function() {
 				})
 			]
 		))
-		.pipe(gulp.dest(PATHS.dist + '/images'));
+		.pipe(gulp.dest(PATHS.dist + '/images'))
+		.pipe(browserSync.stream());
 });
 
 // Clean task
@@ -84,4 +89,21 @@ gulp.task('clean', function() {
 	]);
 });
 
-gulp.task('default', ['clean', 'sass', 'scripts', 'inject', 'images']);
+// Build task - build dist folder
+gulp.task('build', ['clean', 'sass', 'scripts', 'inject', 'images']);
+
+// Watch task
+gulp.task('watch', ['build'], function() {
+    browserSync.init({
+        server: {
+            baseDir: PATHS.dist
+        }
+    });
+    gulp.watch(PATHS.srcSCSS, ['sass']);
+    gulp.watch(PATHS.srcJS, ['scripts']);
+    gulp.watch(PATHS.srcIMG, ['images']);
+    gulp.watch(PATHS.srcHTML, ['inject']);
+});
+
+// Default task
+gulp.task('default', ['watch']);
