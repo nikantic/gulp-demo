@@ -3,6 +3,9 @@ var sass = require('gulp-sass');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var inject = require('gulp-inject');
+var strip = require('gulp-strip-comments');
+var autoprefixer = require('gulp-autoprefixer');
+var del = require("del");
 
 // FILE PATHS
 var PATHS = {
@@ -20,6 +23,7 @@ var PATHS = {
 // Sass task
 gulp.task('sass', function() {
 	return gulp.src(PATHS.srcSCSS)
+		.pipe(autoprefixer())
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
@@ -47,7 +51,15 @@ gulp.task('inject', ['html-copy'], function() {
 	return gulp.src(PATHS.distHTML)
 		.pipe(inject(css, { relative: true }))
 		.pipe(inject(js, { relative: true }))
+		.pipe(strip())
 		.pipe(gulp.dest(PATHS.dist));
 });
 
-gulp.task('default', ['sass', 'scripts', 'inject']);
+// Clean task
+gulp.task('clean', function() {
+	return del.sync([
+		PATHS.dist
+	]);
+});
+
+gulp.task('default', ['clean', 'sass', 'scripts', 'inject']);
