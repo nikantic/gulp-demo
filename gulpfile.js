@@ -6,6 +6,9 @@ var inject = require('gulp-inject');
 var strip = require('gulp-strip-comments');
 var autoprefixer = require('gulp-autoprefixer');
 var del = require("del");
+var imagemin = require('gulp-imagemin');
+var imageminPngquant = require('imagemin-pngquant');
+var imageminJpegoptim = require('imagemin-jpegoptim');
 
 // FILE PATHS
 var PATHS = {
@@ -13,11 +16,12 @@ var PATHS = {
 	srcHTML: 'website/src/index.html',
 	srcSCSS: 'website/src/scss/styles.scss',
 	srcJS: 'website/src/js/**/*.js',
+	srcIMG: 'website/src/images/**/*.{png,jpeg,jpg,svg,gif}',
 
 	dist: 'website/dist',
 	distHTML: 'website/dist/index.html',
 	distCSS: 'website/dist/css/**/*.css',
-	distJS: 'website/dist/js/**/*.js'
+	distJS: 'website/dist/js/**/*.js',
 };
 
 // Sass task
@@ -55,6 +59,24 @@ gulp.task('inject', ['html-copy'], function() {
 		.pipe(gulp.dest(PATHS.dist));
 });
 
+// Images task
+gulp.task('images', function() {
+	return gulp.src(PATHS.srcIMG)
+		.pipe(imagemin(
+			[
+				imagemin.gifsicle(),
+				imagemin.jpegtran(),
+				imagemin.optipng(),
+				imagemin.svgo(),
+				imageminPngquant(),
+				imageminJpegoptim({
+					max: 60
+				})
+			]
+		))
+		.pipe(gulp.dest(PATHS.dist + '/images'));
+});
+
 // Clean task
 gulp.task('clean', function() {
 	return del.sync([
@@ -62,4 +84,4 @@ gulp.task('clean', function() {
 	]);
 });
 
-gulp.task('default', ['clean', 'sass', 'scripts', 'inject']);
+gulp.task('default', ['clean', 'sass', 'scripts', 'inject', 'images']);

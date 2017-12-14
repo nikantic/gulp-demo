@@ -13,9 +13,12 @@
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^4.0.0",
     "gulp-concat": "^2.6.1",
+    "gulp-imagemin": "^4.0.0",
     "gulp-inject": "^4.3.0",
     "gulp-sass": "^3.1.0",
     "gulp-strip-comments": "^2.5.1",
-    "gulp-uglify": "^3.0.0"
+    "gulp-uglify": "^3.0.0",
+    "imagemin-jpegoptim": "^5.1.0",
+    "imagemin-pngquant": "^5.0.1"
   }
 }
