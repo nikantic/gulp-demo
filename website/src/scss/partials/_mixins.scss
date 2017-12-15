@@ -1,0 +1,10 @@
+@mixin btn($btncolor) {
+	background: linear-gradient($btncolor, lighten($btncolor, 5%));
+	box-shadow: 1px 2px 3px $box-shadow-color;
+
+	&:hover {
+		background: linear-gradient(lighten($btncolor, 5%), lighten($btncolor, 10%));
+		transform: translate(0, -10px) scale(1.1);
+		box-shadow: 1px 1px 1px $box-shadow-color;
+	  }
+}

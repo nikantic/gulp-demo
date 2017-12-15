@@ -10,6 +10,7 @@ var imagemin = require('gulp-imagemin');
 var imageminPngquant = require('imagemin-pngquant');
 var imageminJpegoptim = require('imagemin-jpegoptim');
 var browserSync = require('browser-sync').create();
+var plumber = require('gulp-plumber');
 
 // FILE PATHS
 var PATHS = {
@@ -28,10 +29,15 @@ var PATHS = {
 // Sass task
 gulp.task('sass', function() {
 	return gulp.src('website/src/scss/styles.scss')
-		.pipe(autoprefixer())
+		.pipe(plumber(function(err){
+			console.log('Sass task error!');
+			console.log(err);
+			this.emit('end');
+		}))
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
+		.pipe(autoprefixer())
 		.pipe(gulp.dest(PATHS.dist + '/css'))
 		.pipe(browserSync.stream());
 });
@@ -39,6 +45,11 @@ gulp.task('sass', function() {
 // Scripts task
 gulp.task('scripts', function() {
 	return gulp.src(PATHS.srcJS)
+		.pipe(plumber(function(err){
+			console.log('Scripts task error!');
+			console.log(err);
+			this.emit('end');
+		}))
 		.pipe(concat('scripts.js'))
 		.pipe(uglify())
 		.pipe(gulp.dest(PATHS.dist + '/js'))
