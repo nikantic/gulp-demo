@@ -7,6 +7,7 @@ body {
 	text-align: center;
 	font-family: $text-font;
 	color: $body-text-color;
+	background-color: $body-background;
 }
 
 ul {
@@ -26,7 +27,7 @@ ul {
 }
 
 .gulp-image {
-	background-image: url('../images/red-gulp.svg');
+	background-image: url($gulp-image);
 	height: 250px;
 	margin: 60px;
 	background-repeat: no-repeat;
@@ -46,6 +47,12 @@ ul {
     transition: .3s ease;
     user-select: none;
     width: 150px;
+    box-shadow: 1px 2px 3px $box-shadow-color;
+
+    &:hover {
+    	box-shadow: 1px 1px 1px $box-shadow-color;
+    	transform: translate(0, -10px) scale(1.1);
+    }
 }
 
 // Include buttons

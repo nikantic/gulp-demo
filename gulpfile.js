@@ -11,6 +11,7 @@ var imageminPngquant = require('imagemin-pngquant');
 var imageminJpegoptim = require('imagemin-jpegoptim');
 var browserSync = require('browser-sync').create();
 var plumber = require('gulp-plumber');
+var sourcemaps = require('gulp-sourcemaps');
 
 // FILE PATHS
 var PATHS = {
@@ -34,10 +35,12 @@ gulp.task('sass', function() {
 			console.log(err);
 			this.emit('end');
 		}))
+		.pipe(sourcemaps.init())
 		.pipe(sass({
 			outputStyle: 'compressed'
 		}))
 		.pipe(autoprefixer())
+		.pipe(sourcemaps.write('../maps'))
 		.pipe(gulp.dest(PATHS.dist + '/css'))
 		.pipe(browserSync.stream());
 });
@@ -50,8 +53,10 @@ gulp.task('scripts', function() {
 			console.log(err);
 			this.emit('end');
 		}))
+		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
 		.pipe(uglify())
+		.pipe(sourcemaps.write('../maps'))
 		.pipe(gulp.dest(PATHS.dist + '/js'))
 		.pipe(browserSync.stream());
 });
