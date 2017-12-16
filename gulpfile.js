@@ -15,6 +15,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var wait = require('gulp-wait');
 var runSequence = require('run-sequence');
 var gulpif = require('gulp-if');
+var zip = require('gulp-zip');
 var argv = require('yargs').argv;
 
 // FILE PATHS
@@ -107,6 +108,19 @@ gulp.task('clean', function() {
 	return del.sync([
 		PATHS.dist
 	]);
+});
+
+// Zip task
+gulp.task('zip', function() {
+	return gulp.src(PATHS.dist + '/**/*')
+		.pipe(zip('website-dist.zip'))
+		.pipe(gulp.dest('./'));
+});
+
+// Export production website to zip
+gulp.task('export', function(done) {
+	argv.production = true;
+	runSequence('build', 'zip', done);
 });
 
 // Build task - build dist folder
