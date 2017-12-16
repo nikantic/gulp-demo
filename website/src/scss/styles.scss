@@ -17,6 +17,10 @@ ul {
 .container {
 	margin-bottom: 50px;
 
+	@include small-screens {
+		padding: 10px 30px;
+	}
+
 	p {
 		color: $small-heading-color;
 	    margin-top: 14px;
