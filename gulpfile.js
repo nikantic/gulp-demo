@@ -18,6 +18,9 @@ var gulpif = require('gulp-if');
 var zip = require('gulp-zip');
 var argv = require('yargs').argv;
 
+// ENV variable
+var isProduction = argv.env === 'production';
+
 // FILE PATHS
 var PATHS = {
 	src: 'website/src',
@@ -41,10 +44,10 @@ gulp.task('sass', function() {
 			console.log(err);
 			this.emit('end');
 		}))
-		.pipe(gulpif(!argv.production, sourcemaps.init()))
-		.pipe(gulpif(argv.production, sass({outputStyle: 'compressed'}), sass()))
+		.pipe(gulpif(!isProduction, sourcemaps.init()))
+		.pipe(gulpif(isProduction, sass({outputStyle: 'compressed'}), sass()))
 		.pipe(autoprefixer())
-		.pipe(gulpif(!argv.production, sourcemaps.write('../maps')))
+		.pipe(gulpif(!isProduction, sourcemaps.write('../maps')))
 		.pipe(gulp.dest(PATHS.dist + '/css'))
 		.pipe(browserSync.stream());
 });
@@ -57,10 +60,10 @@ gulp.task('scripts', function() {
 			console.log(err);
 			this.emit('end');
 		}))
-		.pipe(gulpif(!argv.production, sourcemaps.init()))
+		.pipe(gulpif(!isProduction, sourcemaps.init()))
 		.pipe(concat('scripts.js'))
-		.pipe(gulpif(argv.production, uglify()))
-		.pipe(gulpif(!argv.production, sourcemaps.write('../maps')))
+		.pipe(gulpif(isProduction, uglify()))
+		.pipe(gulpif(!isProduction, sourcemaps.write('../maps')))
 		.pipe(gulp.dest(PATHS.dist + '/js'))
 		.pipe(browserSync.stream());
 });
@@ -86,7 +89,7 @@ gulp.task('inject', ['html-copy'], function() {
 // Images task
 gulp.task('images', function() {
 	return gulp.src(PATHS.srcIMG)
-		.pipe(gulpif(argv.production, 
+		.pipe(gulpif(isProduction, 
 			imagemin(
 			[
 				imagemin.gifsicle(),
@@ -119,7 +122,7 @@ gulp.task('zip', function() {
 
 // Export production website to zip
 gulp.task('export', function(done) {
-	argv.production = true;
+	isProduction = true;
 	runSequence('build', 'zip', done);
 });
 
