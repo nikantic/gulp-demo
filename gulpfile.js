@@ -12,6 +12,10 @@ var imageminJpegoptim = require('imagemin-jpegoptim');
 var browserSync = require('browser-sync').create();
 var plumber = require('gulp-plumber');
 var sourcemaps = require('gulp-sourcemaps');
+var wait = require('gulp-wait');
+var runSequence = require('run-sequence');
+var gulpif = require('gulp-if');
+var argv = require('yargs').argv;
 
 // FILE PATHS
 var PATHS = {
@@ -30,17 +34,16 @@ var PATHS = {
 // Sass task
 gulp.task('sass', function() {
 	return gulp.src('website/src/scss/styles.scss')
+		.pipe(wait(50))
 		.pipe(plumber(function(err){
 			console.log('Sass task error!');
 			console.log(err);
 			this.emit('end');
 		}))
-		.pipe(sourcemaps.init())
-		.pipe(sass({
-			outputStyle: 'compressed'
-		}))
+		.pipe(gulpif(!argv.production, sourcemaps.init()))
+		.pipe(gulpif(argv.production, sass({outputStyle: 'compressed'}), sass()))
 		.pipe(autoprefixer())
-		.pipe(sourcemaps.write('../maps'))
+		.pipe(gulpif(!argv.production, sourcemaps.write('../maps')))
 		.pipe(gulp.dest(PATHS.dist + '/css'))
 		.pipe(browserSync.stream());
 });
@@ -53,10 +56,10 @@ gulp.task('scripts', function() {
 			console.log(err);
 			this.emit('end');
 		}))
-		.pipe(sourcemaps.init())
+		.pipe(gulpif(!argv.production, sourcemaps.init()))
 		.pipe(concat('scripts.js'))
-		.pipe(uglify())
-		.pipe(sourcemaps.write('../maps'))
+		.pipe(gulpif(argv.production, uglify()))
+		.pipe(gulpif(!argv.production, sourcemaps.write('../maps')))
 		.pipe(gulp.dest(PATHS.dist + '/js'))
 		.pipe(browserSync.stream());
 });
@@ -82,7 +85,8 @@ gulp.task('inject', ['html-copy'], function() {
 // Images task
 gulp.task('images', function() {
 	return gulp.src(PATHS.srcIMG)
-		.pipe(imagemin(
+		.pipe(gulpif(argv.production, 
+			imagemin(
 			[
 				imagemin.gifsicle(),
 				imagemin.jpegtran(),
@@ -93,7 +97,7 @@ gulp.task('images', function() {
 					max: 60
 				})
 			]
-		))
+		)))
 		.pipe(gulp.dest(PATHS.dist + '/images'))
 		.pipe(browserSync.stream());
 });
@@ -106,10 +110,12 @@ gulp.task('clean', function() {
 });
 
 // Build task - build dist folder
-gulp.task('build', ['clean', 'sass', 'scripts', 'inject', 'images']);
+gulp.task('build', function(done) {
+	runSequence('clean', ['sass', 'scripts'], ['inject', 'images'], done);
+});
 
 // Watch task
-gulp.task('watch', ['build'], function() {
+gulp.task('watch', function() {
     browserSync.init({
         server: {
             baseDir: PATHS.dist
@@ -122,4 +128,6 @@ gulp.task('watch', ['build'], function() {
 });
 
 // Default task
-gulp.task('default', ['watch']);
+gulp.task('default', function(done) {
+	runSequence('build', 'watch', done);
+});
