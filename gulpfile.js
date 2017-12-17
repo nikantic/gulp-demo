@@ -19,7 +19,7 @@ var zip = require('gulp-zip');
 var argv = require('yargs').argv;
 
 // ENV variable
-var isProduction = argv.env === 'production';
+var isProduction = (argv.production === undefined) ? false : true;
 
 // FILE PATHS
 var PATHS = {
